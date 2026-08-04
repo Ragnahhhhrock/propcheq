@@ -78,9 +78,16 @@ async function seed() {
     process.exit(0);
   }
 
-  const data = JSON.parse(
-    readFileSync(new URL("./seed-data.json", import.meta.url), "utf8"),
-  ) as SeedData;
+  let data: SeedData;
+  try {
+    data = JSON.parse(
+      readFileSync(new URL("./seed-data.json", import.meta.url), "utf8"),
+    ) as SeedData;
+  } catch {
+    // seed-data.json is git-ignored (private demo data) — absent in production.
+    console.log("No seed-data.json found — starting with an empty database.");
+    process.exit(0);
+  }
 
   // 1. Inspector user
   await db
