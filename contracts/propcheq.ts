@@ -1,4 +1,4 @@
-// Shared domain constants for Inspecta (frontend + backend)
+// Shared domain constants for Propcheq (frontend + backend)
 
 export const REPORT_TYPES = [
   { value: "routine", label: "Routine Inspection" },

@@ -1,4 +1,4 @@
-import { scoreTone } from "@/lib/inspecta-ui";
+import { scoreTone } from "@/lib/propcheq-ui";
 
 // Circular gauge for the 0-100 property score
 export default function ScoreGauge({ score, size = 132 }: { score: number | null; size?: number }) {

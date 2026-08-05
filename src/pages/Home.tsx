@@ -37,8 +37,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { REPORT_TYPES } from "@contracts/inspecta";
-import { TYPE_STYLES, TYPE_LABELS, scoreBadge } from "@/lib/inspecta-ui";
+import { REPORT_TYPES } from "@contracts/propcheq";
+import { TYPE_STYLES, TYPE_LABELS, scoreBadge } from "@/lib/propcheq-ui";
 
 type DashReport = {
   id: number;
@@ -124,9 +124,9 @@ function NewReportDialog({ propertyId, tenantName }: { propertyId: number; tenan
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const navigate = useNavigate();
   const utils = trpc.useUtils();
-  const create = trpc.inspecta.createReport.useMutation({
+  const create = trpc.propcheq.createReport.useMutation({
     onSuccess: async ({ id }) => {
-      await utils.inspecta.invalidate();
+      await utils.propcheq.invalidate();
       navigate(`/reports/${id}/edit`);
     },
     onError: (e) => toast.error(e.message),
@@ -197,9 +197,9 @@ function AddPropertyDialog() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ address: "", suburb: "", state: "WA", postcode: "", tenantName: "", weeklyRent: "", leaseExpiry: "" });
   const utils = trpc.useUtils();
-  const create = trpc.inspecta.createProperty.useMutation({
+  const create = trpc.propcheq.createProperty.useMutation({
     onSuccess: async () => {
-      await utils.inspecta.invalidate();
+      await utils.propcheq.invalidate();
       setOpen(false);
       toast.success("Property added — share the owner code with the owner");
     },
@@ -327,9 +327,9 @@ function PropertyCard({ p, isInspector }: { p: DashProperty; isInspector: boolea
 function OwnerClaim() {
   const [code, setCode] = useState("");
   const utils = trpc.useUtils();
-  const claim = trpc.inspecta.claimOwnerAccess.useMutation({
+  const claim = trpc.propcheq.claimOwnerAccess.useMutation({
     onSuccess: async ({ address }) => {
-      await utils.inspecta.invalidate();
+      await utils.propcheq.invalidate();
       toast.success(`Linked to ${address}`);
       setCode("");
     },
@@ -369,7 +369,7 @@ export default function Home() {
     redirectOnUnauthenticated: true,
     redirectPath: LOGIN_PATH,
   });
-  const { data, isLoading } = trpc.inspecta.myDashboard.useQuery(undefined, {
+  const { data, isLoading } = trpc.propcheq.myDashboard.useQuery(undefined, {
     enabled: !authLoading,
   });
 

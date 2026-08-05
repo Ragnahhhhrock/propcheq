@@ -32,13 +32,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { toast } from "sonner";
-import { RATING_LABELS } from "@contracts/inspecta";
+import { RATING_LABELS } from "@contracts/propcheq";
 import {
   TYPE_STYLES,
   TYPE_LABELS,
   scoreBar,
   formatDate,
-} from "@/lib/inspecta-ui";
+} from "@/lib/propcheq-ui";
 
 type Tri = boolean | null;
 
@@ -113,9 +113,9 @@ function ActionPanel({
 }) {
   const utils = trpc.useUtils();
   const [notes, setNotes] = useState<Record<number, string>>({});
-  const respond = trpc.inspecta.respondActionRequest.useMutation({
+  const respond = trpc.propcheq.respondActionRequest.useMutation({
     onSuccess: async () => {
-      await utils.inspecta.invalidate();
+      await utils.propcheq.invalidate();
       toast.success("Response sent to your inspector");
     },
     onError: (e) => toast.error(e.message),
@@ -198,7 +198,7 @@ export default function ReportView() {
     redirectOnUnauthenticated: true,
     redirectPath: LOGIN_PATH,
   });
-  const { data, isLoading, error } = trpc.inspecta.getReport.useQuery(
+  const { data, isLoading, error } = trpc.propcheq.getReport.useQuery(
     { id: Number(id) },
     { enabled: !authLoading && !!id },
   );

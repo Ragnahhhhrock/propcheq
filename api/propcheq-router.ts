@@ -12,7 +12,7 @@ import {
   actionRequests,
   type Property,
 } from "@db/schema";
-import { areasForType, computeScore, REPORT_TYPES } from "@contracts/inspecta";
+import { areasForType, computeScore, REPORT_TYPES } from "@contracts/propcheq";
 
 function makeCode(len = 8): string {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -46,7 +46,7 @@ async function reportWithProperty(reportId: number) {
   return { report, prop };
 }
 
-export const inspectaRouter = createRouter({
+export const propcheqRouter = createRouter({
   // ------------------------------------------------------------- dashboard
   myDashboard: authedQuery.query(async ({ ctx }) => {
     const db = getDb();

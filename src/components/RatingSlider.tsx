@@ -1,5 +1,5 @@
 import { Slider } from "@/components/ui/slider";
-import { RATING_LABELS } from "@contracts/inspecta";
+import { RATING_LABELS } from "@contracts/propcheq";
 
 interface Props {
   label: string;

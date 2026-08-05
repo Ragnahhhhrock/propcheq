@@ -50,8 +50,8 @@ import {
   SUMMARY_SNIPPETS,
   MAINTENANCE_SNIPPETS,
   computeScore,
-} from "@contracts/inspecta";
-import { TYPE_STYLES, TYPE_LABELS } from "@/lib/inspecta-ui";
+} from "@contracts/propcheq";
+import { TYPE_STYLES, TYPE_LABELS } from "@/lib/propcheq-ui";
 
 type Tri = boolean | null;
 
@@ -77,9 +77,9 @@ function ChecklistEditor({ reportId, initial }: { reportId: number; initial: Edi
   const [areas, setAreas] = useState<EditArea[]>(initial);
   const [dirty, setDirty] = useState(false);
   const utils = trpc.useUtils();
-  const save = trpc.inspecta.updateChecklist.useMutation({
+  const save = trpc.propcheq.updateChecklist.useMutation({
     onSuccess: async () => {
-      await utils.inspecta.getReport.invalidate({ id: reportId });
+      await utils.propcheq.getReport.invalidate({ id: reportId });
       setDirty(false);
       toast.success("Checklist saved");
     },
@@ -273,14 +273,14 @@ function MediaEditor({
   const [uploading, setUploading] = useState(0);
   const [areaSel, setAreaSel] = useState<number | null>(null);
 
-  const attach = trpc.inspecta.attachMedia.useMutation({
+  const attach = trpc.propcheq.attachMedia.useMutation({
     onError: (e) => toast.error(e.message),
   });
-  const update = trpc.inspecta.updateMedia.useMutation({
-    onSuccess: () => utils.inspecta.getReport.invalidate({ id: reportId }),
+  const update = trpc.propcheq.updateMedia.useMutation({
+    onSuccess: () => utils.propcheq.getReport.invalidate({ id: reportId }),
   });
-  const del = trpc.inspecta.deleteMedia.useMutation({
-    onSuccess: () => utils.inspecta.getReport.invalidate({ id: reportId }),
+  const del = trpc.propcheq.deleteMedia.useMutation({
+    onSuccess: () => utils.propcheq.getReport.invalidate({ id: reportId }),
     onError: (e) => toast.error(e.message),
   });
 
@@ -305,7 +305,7 @@ function MediaEditor({
       }
       setUploading((n) => n - 1);
     }
-    await utils.inspecta.getReport.invalidate({ id: reportId });
+    await utils.propcheq.getReport.invalidate({ id: reportId });
     toast.success("Media added");
   }
 
@@ -427,16 +427,16 @@ interface ActionRow {
 function ActionEditor({ reportId, actions }: { reportId: number; actions: ActionRow[] }) {
   const [text, setText] = useState("");
   const utils = trpc.useUtils();
-  const add = trpc.inspecta.addActionRequest.useMutation({
+  const add = trpc.propcheq.addActionRequest.useMutation({
     onSuccess: async () => {
       setText("");
-      await utils.inspecta.getReport.invalidate({ id: reportId });
+      await utils.propcheq.getReport.invalidate({ id: reportId });
       toast.success("Request sent to the owner");
     },
     onError: (e) => toast.error(e.message),
   });
-  const del = trpc.inspecta.deleteActionRequest.useMutation({
-    onSuccess: () => utils.inspecta.getReport.invalidate({ id: reportId }),
+  const del = trpc.propcheq.deleteActionRequest.useMutation({
+    onSuccess: () => utils.propcheq.getReport.invalidate({ id: reportId }),
   });
 
   const STATUS_CLS: Record<ActionRow["status"], string> = {
@@ -506,7 +506,7 @@ export default function ReportEdit() {
     redirectOnUnauthenticated: true,
     redirectPath: LOGIN_PATH,
   });
-  const { data, isLoading, error } = trpc.inspecta.getReport.useQuery(
+  const { data, isLoading, error } = trpc.propcheq.getReport.useQuery(
     { id: reportId },
     { enabled: !authLoading && !!id },
   );
@@ -533,13 +533,13 @@ export default function ReportEdit() {
     }
   }, [data?.report.id]);
 
-  const updateDetails = trpc.inspecta.updateReportDetails.useMutation({
-    onSuccess: () => utils.inspecta.getReport.invalidate({ id: reportId }),
+  const updateDetails = trpc.propcheq.updateReportDetails.useMutation({
+    onSuccess: () => utils.propcheq.getReport.invalidate({ id: reportId }),
     onError: (e) => toast.error(e.message),
   });
-  const setStatus = trpc.inspecta.setReportStatus.useMutation({
+  const setStatus = trpc.propcheq.setReportStatus.useMutation({
     onSuccess: async (_, v) => {
-      await utils.inspecta.invalidate();
+      await utils.propcheq.invalidate();
       toast.success(v.status === "published" ? "Report published — the owner can now see it" : "Report moved back to draft");
     },
     onError: (e) => toast.error(e.message),

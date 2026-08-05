@@ -40,6 +40,6 @@ build/
 coverage/
 .nyc_output/
 
-# Inspecta: local uploads & seeded personal data (property photos, tenant names)
+# Propcheq: local uploads & seeded personal data (property photos, tenant names)
 uploads/
 db/seed-data.json

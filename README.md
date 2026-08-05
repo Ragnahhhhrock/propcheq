@@ -1,4 +1,4 @@
-# Inspecta
+# Propcheq
 
 Mobile-first property inspection reports for residential investment properties — replacing the dated Word-table workflow with a fast tap-to-inspect app and a clean, Instagram-style report page for owners.
 
@@ -44,8 +44,8 @@ npm start
 The Docker image pushes the schema, seeds demo data (skipped if already seeded) and starts the server:
 
 ```bash
-docker build -t inspecta .
-docker run -p 3000:3000 inspecta
+docker build -t propcheq .
+docker run -p 3000:3000 propcheq
 ```
 
 ## Project layout
@@ -55,8 +55,8 @@ docker run -p 3000:3000 inspecta
 | `src/pages` | Dashboard, report editor (inspector), report view (owner) |
 | `src/components` | ScoreGauge, RatingSlider, TriToggle, SnippetChips, TopBar |
 | `api/` | Hono server, tRPC routers, auth, media upload routes |
-| `api/inspecta-router.ts` | All inspection domain procedures |
-| `contracts/inspecta.ts` | Shared templates, snippet phrases, scoring |
+| `api/propcheq-router.ts` | All inspection domain procedures |
+| `contracts/propcheq.ts` | Shared templates, snippet phrases, scoring |
 | `db/schema.ts` | Drizzle schema (users, properties, reports, areas, items, media, action_requests) |
 | `db/seed.ts` | Idempotent seed script (reads `db/seed-data.json`, git-ignored) |
 

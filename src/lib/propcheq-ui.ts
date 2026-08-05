@@ -1,4 +1,4 @@
-// UI helpers shared across Inspecta pages
+// UI helpers shared across Propcheq pages
 
 export function scoreTone(score: number | null | undefined): string {
   if (score == null) return "text-muted-foreground";
