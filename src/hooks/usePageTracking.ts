@@ -7,7 +7,7 @@ declare global {
   }
 }
 
-const MEASUREMENT_ID = 'G-N42W8XDSYN'
+const MEASUREMENT_ID = 'G-86KZ5ZWB79'
 
 // Sends a GA4 page_view on every client-side route change.
 // index.html loads gtag with send_page_view disabled so this is the single source.
