@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router'
 import { Toaster } from '@/components/ui/sonner'
+import { usePageTracking } from '@/hooks/usePageTracking'
 import Home from './pages/Home'
 import Landing from './pages/Landing'
 import Login from "./pages/Login"
@@ -8,6 +9,8 @@ import ReportEdit from "./pages/ReportEdit"
 import NotFound from "./pages/NotFound"
 
 export default function App() {
+  usePageTracking()
+
   return (
     <>
       <Toaster position="top-center" richColors />
