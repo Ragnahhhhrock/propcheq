@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Link, NavLink } from "react-router";
 
-const NAV_ITEMS = [{ label: "Dashboard", path: "/", icon: LayoutDashboard }];
+const NAV_ITEMS = [{ label: "Dashboard", path: "/dashboard", icon: LayoutDashboard }];
 
 export default function TopBar() {
   const { user, logout } = useAuth();
