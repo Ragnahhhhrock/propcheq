@@ -117,7 +117,7 @@ function ChecklistEditor({ reportId, initial }: { reportId: number; initial: Edi
                 })),
               })
             }
-            className="bg-emerald-600 hover:bg-emerald-700"
+            className="bg-brand-blue hover:bg-blue-600"
           >
             {save.isPending ? "Saving…" : dirty ? "Save checklist" : "Saved"}
           </Button>
@@ -342,7 +342,7 @@ function MediaEditor({
         />
         <div className="flex gap-2">
           <Button
-            className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+            className="flex-1 bg-brand-blue hover:bg-blue-600"
             disabled={uploading > 0}
             onClick={() => cameraRef.current?.click()}
           >
@@ -486,7 +486,7 @@ function ActionEditor({ reportId, actions }: { reportId: number; actions: Action
             onChange={(e) => setText(e.target.value)}
           />
           <Button
-            className="bg-emerald-600 hover:bg-emerald-700"
+            className="bg-brand-blue hover:bg-blue-600"
             disabled={text.trim().length < 3 || add.isPending}
             onClick={() => add.mutate({ reportId, text: text.trim() })}
           >
@@ -619,7 +619,7 @@ export default function ReportEdit() {
             <Button
               size="sm"
               variant={report.status === "published" ? "outline" : "default"}
-              className={report.status === "published" ? "" : "bg-emerald-600 hover:bg-emerald-700"}
+              className={report.status === "published" ? "" : "bg-brand-blue hover:bg-blue-600"}
               disabled={setStatus.isPending}
               onClick={() =>
                 setStatus.mutate({

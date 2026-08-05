@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 function getOAuthUrl() {
@@ -19,23 +18,32 @@ function getOAuthUrl() {
 
 export default function Login() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <CardTitle>Welcome</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Button
-            className="w-full"
-            size="lg"
-            onClick={() => {
-              window.location.href = getOAuthUrl();
-            }}
-          >
-            Sign in with Kimi
-          </Button>
-        </CardContent>
-      </Card>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#F8FAFC] px-4">
+      <div className="flex w-full max-w-sm flex-col items-center gap-8">
+        <div className="flex flex-col items-center gap-4">
+          <img
+            src="/brand/propcheq-icon-512.png"
+            alt="Propcheq"
+            className="h-20 w-20 rounded-[22px] shadow-soft"
+          />
+          <div className="text-center">
+            <h1 className="text-3xl font-extrabold tracking-tight text-[#0F172A]">Propcheq</h1>
+            <p className="mt-1.5 text-sm text-[#64748B]">Property inspections, in focus.</p>
+          </div>
+        </div>
+        <Button
+          className="h-11 w-full rounded-full bg-brand-gradient text-base font-semibold text-white shadow-soft transition-opacity hover:opacity-90"
+          size="lg"
+          onClick={() => {
+            window.location.href = getOAuthUrl();
+          }}
+        >
+          Sign in with Kimi
+        </Button>
+        <p className="text-center text-xs text-[#64748B]">
+          Photo-first inspection reports owners actually read.
+        </p>
+      </div>
     </div>
   );
 }

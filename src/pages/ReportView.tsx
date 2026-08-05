@@ -158,7 +158,7 @@ function ActionPanel({
                 <div className="flex gap-2">
                   <Button
                     size="sm"
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                    className="flex-1 bg-brand-blue hover:bg-blue-600"
                     disabled={respond.isPending}
                     onClick={() => respond.mutate({ id: a.id, status: "approved", response: notes[a.id] || "Approved" })}
                   >
@@ -280,7 +280,7 @@ export default function ReportView() {
             )}
           </div>
           {viewerRole === "inspector" && (
-            <Button asChild size="sm" className="mt-3 bg-emerald-600 hover:bg-emerald-700">
+            <Button asChild size="sm" className="mt-3 bg-brand-blue hover:bg-blue-600">
               <Link to={`/reports/${report.id}/edit`}>
                 <Pencil className="mr-1.5 h-4 w-4" /> Edit report
               </Link>
@@ -337,7 +337,7 @@ export default function ReportView() {
         {mediaList.length > 0 && (
           <div className="space-y-3">
             <h2 className="flex items-center gap-2 text-lg font-semibold">
-              <Sparkles className="h-4 w-4 text-emerald-600" /> Photos & video
+              <Sparkles className="h-4 w-4 text-brand-teal" /> Photos & video
             </h2>
             <div className="space-y-4">
               {mediaList.map((m) => (
@@ -375,7 +375,7 @@ export default function ReportView() {
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <ClipboardList className="h-4 w-4 text-emerald-600" /> Our summary
+                    <ClipboardList className="h-4 w-4 text-brand-teal" /> Our summary
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm leading-relaxed">{report.summary}</CardContent>
@@ -407,7 +407,7 @@ export default function ReportView() {
         {/* checklist */}
         <div className="space-y-3">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <ClipboardList className="h-4 w-4 text-emerald-600" /> Inspection checklist
+            <ClipboardList className="h-4 w-4 text-brand-teal" /> Inspection checklist
           </h2>
           <Card>
             <CardContent className="px-2 py-1">

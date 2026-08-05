@@ -15,7 +15,7 @@ export default function RatingSlider({ label, value, onChange, disabled }: Props
     <div className="rounded-xl border bg-white p-4">
       <div className="mb-1 flex items-baseline justify-between">
         <span className="text-sm font-medium">{label}</span>
-        <span className="text-sm font-semibold text-emerald-700">
+        <span className="text-sm font-semibold text-teal-700">
           {value ? `${value}/10 — ${RATING_LABELS[value]}` : "Not rated"}
         </span>
       </div>

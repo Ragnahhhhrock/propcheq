@@ -14,7 +14,7 @@ export default function SnippetChips({ snippets, onPick }: Props) {
           key={s}
           type="button"
           onClick={() => onPick(s)}
-          className="inline-flex shrink-0 items-center gap-1 rounded-full border bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-800 transition-colors hover:bg-emerald-100 active:bg-emerald-200"
+          className="inline-flex shrink-0 items-center gap-1 rounded-full border bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-800 transition-colors hover:bg-teal-100 active:bg-teal-200"
         >
           <Plus className="h-3 w-3" />
           {s.length > 42 ? s.slice(0, 42) + "…" : s}

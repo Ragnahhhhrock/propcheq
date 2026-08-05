@@ -9,13 +9,11 @@ export default function ScoreGauge({ score, size = 132 }: { score: number | null
   const color =
     score == null
       ? "#d4d4d8"
-      : score >= 85
+      : score >= 80
         ? "#10b981"
-        : score >= 70
-          ? "#84cc16"
-          : score >= 50
-            ? "#f59e0b"
-            : "#ef4444";
+        : score >= 50
+          ? "#f59e0b"
+          : "#ef4444";
   return (
     <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">

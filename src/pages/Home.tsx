@@ -69,7 +69,7 @@ function ReportRow({ r }: { r: DashReport }) {
   return (
     <Link
       to={`/reports/${r.id}`}
-      className="flex items-center gap-3 rounded-lg border bg-white px-3 py-2.5 transition-colors hover:border-emerald-300 hover:bg-emerald-50/40"
+      className="flex items-center gap-3 rounded-lg border bg-white px-3 py-2.5 transition-colors hover:border-teal-300 hover:bg-teal-50/40"
     >
       <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${TYPE_STYLES[r.type]}`}>
         {TYPE_LABELS[r.type]}
@@ -108,7 +108,7 @@ function CopyCode({ code }: { code: string }) {
         setTimeout(() => setCopied(false), 1500);
         toast.success("Owner code copied");
       }}
-      className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-emerald-400 bg-emerald-50 px-2 py-1 text-xs font-semibold tracking-widest text-emerald-800"
+      className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-teal-400 bg-teal-50 px-2 py-1 text-xs font-semibold tracking-widest text-teal-800"
       title="Copy owner invite code"
     >
       <KeyRound className="h-3.5 w-3.5" />
@@ -135,7 +135,7 @@ function NewReportDialog({ propertyId, tenantName }: { propertyId: number; tenan
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
+        <Button size="sm" className="bg-brand-blue hover:bg-blue-600">
           <FilePlus2 className="mr-1.5 h-4 w-4" />
           New report
         </Button>
@@ -169,7 +169,7 @@ function NewReportDialog({ propertyId, tenantName }: { propertyId: number; tenan
             pre-filled so you can inspect by tapping.
           </p>
           <Button
-            className="w-full bg-emerald-600 hover:bg-emerald-700"
+            className="w-full bg-brand-blue hover:bg-blue-600"
             disabled={create.isPending}
             onClick={() =>
               create.mutate({
@@ -253,7 +253,7 @@ function AddPropertyDialog() {
             </div>
           </div>
           <Button
-            className="w-full bg-emerald-600 hover:bg-emerald-700"
+            className="w-full bg-brand-blue hover:bg-blue-600"
             disabled={create.isPending || form.address.length < 3 || form.suburb.length < 2}
             onClick={() =>
               create.mutate({
@@ -283,7 +283,7 @@ function PropertyCard({ p, isInspector }: { p: DashProperty; isInspector: boolea
         <div className="flex items-start justify-between gap-2">
           <div>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Building2 className="h-4 w-4 text-emerald-600" />
+              <Building2 className="h-4 w-4 text-brand-teal" />
               {p.address}, {p.suburb} {p.state} {p.postcode}
             </CardTitle>
             <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -349,7 +349,7 @@ function OwnerClaim() {
             className="tracking-widest"
           />
           <Button
-            className="bg-emerald-600 hover:bg-emerald-700"
+            className="bg-brand-blue hover:bg-blue-600"
             disabled={code.length < 4 || claim.isPending}
             onClick={() => claim.mutate({ code })}
           >
