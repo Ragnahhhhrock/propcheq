@@ -15,6 +15,7 @@ import {
   Menu,
   User,
   KeyRound,
+  Facebook,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -560,6 +561,17 @@ export default function Landing() {
               <p className="mt-3 max-w-xs text-sm text-white/70">
                 Property inspections, in focus. Photo-first reports that owners actually read.
               </p>
+              <div className="mt-4 flex items-center gap-3">
+                <a
+                  href="https://www.facebook.com/profile.php?id=61592659119893"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Propcheq on Facebook"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/85 transition hover:bg-white/20 hover:text-white"
+                >
+                  <Facebook className="h-5 w-5" />
+                </a>
+              </div>
             </div>
             <div>
               <h4 className="text-sm font-bold uppercase tracking-widest text-white/60">Contact</h4>
