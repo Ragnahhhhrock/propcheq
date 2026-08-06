@@ -16,6 +16,8 @@ import {
   User,
   KeyRound,
   Facebook,
+  Instagram,
+  Linkedin,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -570,6 +572,24 @@ export default function Landing() {
                   className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/85 transition hover:bg-white/20 hover:text-white"
                 >
                   <Facebook className="h-5 w-5" />
+                </a>
+                <a
+                  href="https://www.instagram.com/propcheq"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Propcheq on Instagram"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/85 transition hover:bg-white/20 hover:text-white"
+                >
+                  <Instagram className="h-5 w-5" />
+                </a>
+                <a
+                  href="https://www.linkedin.com/company/propcheq/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Propcheq on LinkedIn"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/85 transition hover:bg-white/20 hover:text-white"
+                >
+                  <Linkedin className="h-5 w-5" />
                 </a>
               </div>
             </div>
