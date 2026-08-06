@@ -9,12 +9,15 @@ import { appRouter } from "./router";
 import { createContext } from "./context";
 import { env } from "./lib/env";
 import { createOAuthCallbackHandler, authenticateRequest } from "./kimi/auth";
+import { googleOAuthStart, googleOAuthCallback } from "./google-auth";
 import { Paths } from "@contracts/constants";
 
 const app = new Hono<{ Bindings: HttpBindings }>();
 
 app.use(bodyLimit({ maxSize: 50 * 1024 * 1024 }));
 app.get(Paths.oauthCallback, createOAuthCallbackHandler());
+app.get("/api/oauth/google/start", googleOAuthStart());
+app.get("/api/oauth/google/callback", googleOAuthCallback());
 
 // ---------------------------------------------------------------------------
 // Media uploads (inspection photos / videos), stored on local disk
