@@ -93,6 +93,9 @@ function LandingNav() {
               {n.label}
             </a>
           ))}
+          <Link to="/demo" className="text-sm font-semibold text-brand-teal hover:text-brand-blue">
+            Live demo
+          </Link>
         </nav>
         <div className="hidden lg:block">
           <SignInMenu />
@@ -565,7 +568,7 @@ export default function Landing() {
               </p>
               <div className="mt-4 flex items-center gap-3">
                 <a
-                  href="https://www.facebook.com/profile.php?id=61592659119893"
+                  href="https://www.facebook.com/propcheq"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Propcheq on Facebook"

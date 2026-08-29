@@ -1,24 +1,31 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import {
+  BellRing,
   Building2,
-  Plus,
-  KeyRound,
-  Copy,
+  CalendarClock,
   Check,
   ChevronRight,
-  FilePlus2,
-  BellRing,
-  Users,
-  CalendarClock,
+  Copy,
   DollarSign,
+  FilePlusCorner,
+  KeyRound,
+  Plus,
+  Users,
 } from "lucide-react";
+import { toast } from "sonner";
+import type { inferRouterOutputs } from "@trpc/server";
 import { trpc } from "@/providers/trpc";
 import { useAuth } from "@/hooks/useAuth";
 import { LOGIN_PATH } from "@/const";
 import TopBar from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,49 +43,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
-import { REPORT_TYPES } from "@contracts/propcheq";
 import { TYPE_STYLES, TYPE_LABELS, scoreBadge } from "@/lib/propcheq-ui";
+import type { ReportType } from "@contracts/propcheq";
+import type { AppRouter } from "../../api/router";
 
-type DashReport = {
-  id: number;
-  title: string;
-  type: string;
-  status: string;
-  inspectionDate: string;
-  score: number | null;
-  pendingActions: number;
-  answeredActions: number;
-};
+type RouterOutputs = inferRouterOutputs<AppRouter>;
+type DashboardData = RouterOutputs["propcheq"]["myDashboard"];
+type PropertyWithReports = DashboardData["inspectorProperties"][number];
+type ReportSummary = PropertyWithReports["reports"][number];
 
-type DashProperty = {
-  id: number;
-  address: string;
-  suburb: string;
-  state: string;
-  postcode: string;
-  tenantName: string | null;
-  leaseExpiry: string | null;
-  weeklyRent: string | null;
-  ownerCode?: string;
-  viewerRole: "inspector" | "owner";
-  reports: DashReport[];
-};
+const REPORT_TYPE_OPTIONS = [
+  { value: "routine", label: "Routine Inspection" },
+  { value: "entry", label: "Entry Condition" },
+  { value: "exit", label: "Exit Condition" },
+] as const;
 
-function ReportRow({ r }: { r: DashReport }) {
+/* ------------------------------- report row ------------------------------ */
+
+function ReportRow({ r }: { r: ReportSummary }) {
   return (
     <Link
       to={`/reports/${r.id}`}
       className="flex items-center gap-3 rounded-lg border bg-white px-3 py-2.5 transition-colors hover:border-teal-300 hover:bg-teal-50/40"
     >
-      <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${TYPE_STYLES[r.type]}`}>
+      <span
+        className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${TYPE_STYLES[r.type]}`}
+      >
         {TYPE_LABELS[r.type]}
       </span>
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-medium">{r.title}</div>
         <div className="text-xs text-muted-foreground">
           {r.inspectionDate}
-          {r.status === "draft" && <span className="ml-2 font-medium text-amber-600">Draft</span>}
+          {r.status === "draft" && (
+            <span className="ml-2 font-medium text-amber-600">Draft</span>
+          )}
         </div>
       </div>
       {r.pendingActions > 0 && (
@@ -88,7 +87,9 @@ function ReportRow({ r }: { r: DashReport }) {
         </span>
       )}
       {r.score != null && (
-        <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${scoreBadge(r.score)}`}>
+        <span
+          className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${scoreBadge(r.score)}`}
+        >
           {r.score}
         </span>
       )}
@@ -97,7 +98,9 @@ function ReportRow({ r }: { r: DashReport }) {
   );
 }
 
-function CopyCode({ code }: { code: string }) {
+/* ----------------------------- owner code chip ---------------------------- */
+
+function OwnerCodeBadge({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
@@ -113,14 +116,26 @@ function CopyCode({ code }: { code: string }) {
     >
       <KeyRound className="h-3.5 w-3.5" />
       {code}
-      {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+      {copied ? (
+        <Check className="h-3.5 w-3.5" />
+      ) : (
+        <Copy className="h-3.5 w-3.5" />
+      )}
     </button>
   );
 }
 
-function NewReportDialog({ propertyId, tenantName }: { propertyId: number; tenantName: string | null }) {
+/* ---------------------------- new report dialog --------------------------- */
+
+function NewReportDialog({
+  propertyId,
+  tenantName,
+}: {
+  propertyId: number;
+  tenantName: string | null;
+}) {
   const [open, setOpen] = useState(false);
-  const [type, setType] = useState<string>("routine");
+  const [type, setType] = useState<ReportType>("routine");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const navigate = useNavigate();
   const utils = trpc.useUtils();
@@ -129,14 +144,14 @@ function NewReportDialog({ propertyId, tenantName }: { propertyId: number; tenan
       await utils.propcheq.invalidate();
       navigate(`/reports/${id}/edit`);
     },
-    onError: (e) => toast.error(e.message),
+    onError: (err) => toast.error(err.message),
   });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" className="bg-brand-blue hover:bg-blue-600">
-          <FilePlus2 className="mr-1.5 h-4 w-4" />
+          <FilePlusCorner className="mr-1.5 h-4 w-4" />
           New report
         </Button>
       </DialogTrigger>
@@ -147,14 +162,14 @@ function NewReportDialog({ propertyId, tenantName }: { propertyId: number; tenan
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label>Report type</Label>
-            <Select value={type} onValueChange={setType}>
+            <Select value={type} onValueChange={(v) => setType(v as ReportType)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {REPORT_TYPES.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
+                {REPORT_TYPE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -162,10 +177,15 @@ function NewReportDialog({ propertyId, tenantName }: { propertyId: number; tenan
           </div>
           <div className="space-y-1.5">
             <Label>Inspection date</Label>
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
           </div>
           <p className="text-xs text-muted-foreground">
-            A full checklist template ({tenantName ? "with current tenants" : "all rooms"}) will be
+            A full checklist template (
+            {tenantName ? "with current tenants" : "all rooms"}) will be
             pre-filled so you can inspect by tapping.
           </p>
           <Button
@@ -174,13 +194,16 @@ function NewReportDialog({ propertyId, tenantName }: { propertyId: number; tenan
             onClick={() =>
               create.mutate({
                 propertyId,
-                type: type as "routine" | "entry" | "exit",
-                inspectionDate: new Date(date + "T00:00:00").toLocaleDateString("en-AU", {
-                  weekday: "long",
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                }),
+                type,
+                inspectionDate: new Date(date + "T00:00:00").toLocaleDateString(
+                  "en-AU",
+                  {
+                    weekday: "long",
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  },
+                ),
                 tenantName: tenantName ?? undefined,
               })
             }
@@ -193,9 +216,19 @@ function NewReportDialog({ propertyId, tenantName }: { propertyId: number; tenan
   );
 }
 
-function AddPropertyDialog() {
+/* --------------------------- new property dialog -------------------------- */
+
+function NewPropertyDialog() {
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ address: "", suburb: "", state: "WA", postcode: "", tenantName: "", weeklyRent: "", leaseExpiry: "" });
+  const [form, setForm] = useState({
+    address: "",
+    suburb: "",
+    state: "WA",
+    postcode: "",
+    tenantName: "",
+    weeklyRent: "",
+    leaseExpiry: "",
+  });
   const utils = trpc.useUtils();
   const create = trpc.propcheq.createProperty.useMutation({
     onSuccess: async () => {
@@ -203,10 +236,11 @@ function AddPropertyDialog() {
       setOpen(false);
       toast.success("Property added — share the owner code with the owner");
     },
-    onError: (e) => toast.error(e.message),
+    onError: (err) => toast.error(err.message),
   });
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm({ ...form, [k]: e.target.value });
+  const set =
+    (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm({ ...form, [key]: e.target.value });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -222,12 +256,20 @@ function AddPropertyDialog() {
         <div className="space-y-3">
           <div className="space-y-1">
             <Label>Street address</Label>
-            <Input placeholder="2/10 Hillcrest Road" value={form.address} onChange={set("address")} />
+            <Input
+              placeholder="2/10 Hillcrest Road"
+              value={form.address}
+              onChange={set("address")}
+            />
           </div>
           <div className="grid grid-cols-3 gap-2">
             <div className="col-span-1 space-y-1">
               <Label>Suburb</Label>
-              <Input placeholder="Kewdale" value={form.suburb} onChange={set("suburb")} />
+              <Input
+                placeholder="Kewdale"
+                value={form.suburb}
+                onChange={set("suburb")}
+              />
             </div>
             <div className="space-y-1">
               <Label>State</Label>
@@ -235,26 +277,46 @@ function AddPropertyDialog() {
             </div>
             <div className="space-y-1">
               <Label>Postcode</Label>
-              <Input placeholder="6105" value={form.postcode} onChange={set("postcode")} />
+              <Input
+                placeholder="6105"
+                value={form.postcode}
+                onChange={set("postcode")}
+              />
             </div>
           </div>
           <div className="space-y-1">
             <Label>Tenants (optional)</Label>
-            <Input placeholder="Names, separated by ;" value={form.tenantName} onChange={set("tenantName")} />
+            <Input
+              placeholder="Names, separated by ;"
+              value={form.tenantName}
+              onChange={set("tenantName")}
+            />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
               <Label>Weekly rent</Label>
-              <Input placeholder="$810 per week" value={form.weeklyRent} onChange={set("weeklyRent")} />
+              <Input
+                placeholder="$810 per week"
+                value={form.weeklyRent}
+                onChange={set("weeklyRent")}
+              />
             </div>
             <div className="space-y-1">
               <Label>Lease expiry</Label>
-              <Input placeholder="13/03/2027" value={form.leaseExpiry} onChange={set("leaseExpiry")} />
+              <Input
+                placeholder="13/03/2027"
+                value={form.leaseExpiry}
+                onChange={set("leaseExpiry")}
+              />
             </div>
           </div>
           <Button
             className="w-full bg-brand-blue hover:bg-blue-600"
-            disabled={create.isPending || form.address.length < 3 || form.suburb.length < 2}
+            disabled={
+              create.isPending ||
+              form.address.length < 3 ||
+              form.suburb.length < 2
+            }
             onClick={() =>
               create.mutate({
                 address: form.address,
@@ -275,8 +337,18 @@ function AddPropertyDialog() {
   );
 }
 
-function PropertyCard({ p, isInspector }: { p: DashProperty; isInspector: boolean }) {
-  const reports = isInspector ? p.reports : p.reports.filter((r) => r.status === "published");
+/* ------------------------------ property card ----------------------------- */
+
+function PropertyCard({
+  p,
+  isInspector,
+}: {
+  p: PropertyWithReports;
+  isInspector: boolean;
+}) {
+  const reports = isInspector
+    ? p.reports
+    : p.reports.filter((r) => r.status === "published");
   return (
     <Card className="overflow-hidden">
       <CardHeader className="pb-3">
@@ -304,7 +376,7 @@ function PropertyCard({ p, isInspector }: { p: DashProperty; isInspector: boolea
               )}
             </div>
           </div>
-          {isInspector && p.ownerCode && <CopyCode code={p.ownerCode} />}
+          {isInspector && p.ownerCode && <OwnerCodeBadge code={p.ownerCode} />}
         </div>
       </CardHeader>
       <CardContent className="space-y-2">
@@ -324,7 +396,9 @@ function PropertyCard({ p, isInspector }: { p: DashProperty; isInspector: boolea
   );
 }
 
-function OwnerClaim() {
+/* ------------------------------ owner link card --------------------------- */
+
+function OwnerLinkCard() {
   const [code, setCode] = useState("");
   const utils = trpc.useUtils();
   const claim = trpc.propcheq.claimOwnerAccess.useMutation({
@@ -333,7 +407,7 @@ function OwnerClaim() {
       toast.success(`Linked to ${address}`);
       setCode("");
     },
-    onError: (e) => toast.error(e.message),
+    onError: (err) => toast.error(err.message),
   });
   return (
     <Card>
@@ -357,12 +431,15 @@ function OwnerClaim() {
           </Button>
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          Your property manager can give you the 6–8 character code for your property.
+          Your property manager can give you the 6–8 character code for your
+          property.
         </p>
       </CardContent>
     </Card>
   );
 }
+
+/* --------------------------------- page ---------------------------------- */
 
 export default function Home() {
   const { isLoading: authLoading } = useAuth({
@@ -385,8 +462,8 @@ export default function Home() {
     );
   }
 
-  const inspectorProps = (data?.inspectorProperties ?? []) as DashProperty[];
-  const ownerProps = (data?.ownerProperties ?? []) as DashProperty[];
+  const inspectorProperties = data?.inspectorProperties ?? [];
+  const ownerProperties = data?.ownerProperties ?? [];
 
   return (
     <div className="min-h-screen bg-muted/40 pb-16">
@@ -395,26 +472,26 @@ export default function Home() {
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">My inspections</h2>
-            <AddPropertyDialog />
+            <NewPropertyDialog />
           </div>
-          {inspectorProps.length === 0 && (
+          {inspectorProperties.length === 0 && (
             <Card>
               <CardContent className="py-8 text-center text-sm text-muted-foreground">
-                No properties yet — add your first property to start inspecting.
+                No properties yet — add your first property to start
+                inspecting.
               </CardContent>
             </Card>
           )}
-          {inspectorProps.map((p) => (
-            <PropertyCard key={p.id} p={p} isInspector />
+          {inspectorProperties.map((p) => (
+            <PropertyCard key={p.id} p={p} isInspector={true} />
           ))}
         </section>
-
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Properties I own</h2>
-          {ownerProps.map((p) => (
+          {ownerProperties.map((p) => (
             <PropertyCard key={p.id} p={p} isInspector={false} />
           ))}
-          <OwnerClaim />
+          <OwnerLinkCard />
         </section>
       </main>
     </div>

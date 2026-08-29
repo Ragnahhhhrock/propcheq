@@ -1,6 +1,6 @@
-import devServer from "@hono/vite-dev-server"
 import path from "path"
 const __dirname = import.meta.dirname
+import devServer from "@hono/vite-dev-server"
 import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 import { inspectAttr } from 'kimi-plugin-inspect-react'
@@ -9,9 +9,12 @@ import { inspectAttr } from 'kimi-plugin-inspect-react'
 export default defineConfig({
   plugins: [
     devServer({ entry: "api/boot.ts", exclude: [/^\/(?!api\/).*$/] }),
-    inspectAttr(), react()],
+    inspectAttr(),
+    react(),
+  ],
   server: {
     port: 3000,
+    allowedHosts: true,
   },
   resolve: {
     alias: {

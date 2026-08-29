@@ -170,6 +170,13 @@ export default function Login() {
         >
           Sign in with Kimi
         </button>
+
+        <a
+          href="/demo"
+          className="text-sm font-medium text-brand-teal hover:underline"
+        >
+          Just looking? Explore the demo — no account needed
+        </a>
       </div>
     </div>
   );

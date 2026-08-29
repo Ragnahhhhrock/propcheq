@@ -48,13 +48,6 @@ module.exports = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        brand: {
-          teal: "#14B8A6",
-          blue: "#3B82F6",
-        },
-        good: "#10B981",
-        warn: "#F59E0B",
-        bad: "#EF4444",
       },
       borderRadius: {
         xl: "calc(var(--radius) + 4px)",
@@ -63,15 +56,12 @@ module.exports = {
         sm: "calc(var(--radius) - 4px)",
         xs: "calc(var(--radius) - 6px)",
       },
+      backgroundImage: {
+        "brand-gradient": "linear-gradient(135deg, #14B8A6 0%, #3B82F6 100%)",
+      },
       boxShadow: {
         xs: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
         soft: "0 1px 3px rgb(15 23 42 / 0.08)",
-      },
-      fontFamily: {
-        sans: ["Inter", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
-      },
-      backgroundImage: {
-        "brand-gradient": "linear-gradient(135deg, #14B8A6 0%, #3B82F6 100%)",
       },
       keyframes: {
         "accordion-down": {
