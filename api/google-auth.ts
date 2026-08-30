@@ -10,12 +10,27 @@ const clientId = () => process.env.GOOGLE_CLIENT_ID ?? "";
 const clientSecret = () => process.env.GOOGLE_CLIENT_SECRET ?? "";
 const CALLBACK_PATH = "/api/oauth/google/callback";
 
+// Behind a TLS-terminating proxy (Railway, preview gateways, etc.) the Node
+// server sees plain http, so c.req.url has the wrong scheme. Rebuild the
+// public origin from the forwarded headers the proxy sets.
+function requestOrigin(c: Context): string {
+  const url = new URL(c.req.url);
+  const proto =
+    c.req.header("x-forwarded-proto")?.split(",")[0]?.trim() ||
+    url.protocol.replace(":", "");
+  const host =
+    c.req.header("x-forwarded-host")?.split(",")[0]?.trim() ||
+    c.req.header("host") ||
+    url.host;
+  return `${proto}://${host}`;
+}
+
 export function googleOAuthStart() {
   return (c: Context) => {
     if (!clientId() || !clientSecret()) {
       return c.json({ error: "Google sign-in is not configured yet" }, 501);
     }
-    const origin = new URL(c.req.url).origin;
+    const origin = requestOrigin(c);
     const redirectUri = `${origin}${CALLBACK_PATH}`;
     const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
     url.searchParams.set("client_id", clientId());
