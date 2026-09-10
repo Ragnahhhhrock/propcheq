@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   BellRing,
   Building2,
@@ -10,6 +10,7 @@ import {
   DollarSign,
   FilePlusCorner,
   KeyRound,
+  Pencil,
   Plus,
   Users,
 } from "lucide-react";
@@ -24,6 +25,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { REPORT_TYPES, type ReportType } from "@contracts/propcheq";
 import { TYPE_STYLES, TYPE_LABELS, scoreBadge } from "@/lib/propcheq-ui";
 import {
   demoInspectorProperties,
@@ -31,9 +48,10 @@ import {
   type DemoProperty,
   type DemoReportSummary,
 } from "@/demo/demoData";
+import { getDemoSession, startDemoSession } from "@/demo/demoStore";
 
 const DEMO_TOAST = () =>
-  toast.info("Demo mode — sign up free to create your own inspections.");
+  toast.info("Demo mode — sign up free to create your own properties.");
 
 /* ------------------------------- report row ------------------------------ */
 
@@ -102,6 +120,111 @@ function OwnerCodeBadge({ code }: { code: string }) {
   );
 }
 
+/* ---------------------------- new report dialog --------------------------- */
+
+function NewReportDialog({ tenantName }: { tenantName: string | null }) {
+  const [open, setOpen] = useState(false);
+  const [type, setType] = useState<ReportType>("routine");
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const navigate = useNavigate();
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" className="bg-brand-blue hover:bg-blue-600">
+          <FilePlusCorner className="mr-1.5 h-4 w-4" />
+          New report
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Start a new inspection report</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label>Report type</Label>
+            <Select value={type} onValueChange={(v) => setType(v as ReportType)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {REPORT_TYPES.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Inspection date</Label>
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            A full checklist template (
+            {tenantName ? "with current tenants" : "all rooms"}) will be
+            pre-filled so you can inspect by tapping.
+          </p>
+          <Button
+            className="w-full bg-brand-blue hover:bg-blue-600"
+            onClick={() => {
+              startDemoSession(
+                type,
+                new Date(date + "T00:00:00").toLocaleDateString("en-AU", {
+                  weekday: "long",
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                }),
+                tenantName ?? "",
+              );
+              toast.success("Demo inspection started — your changes stay in this browser tab");
+              navigate("/demo/inspect");
+            }}
+          >
+            Create & start inspecting
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* --------------------------- active session row --------------------------- */
+
+function DemoSessionRow() {
+  const session = getDemoSession();
+  if (!session) return null;
+  return (
+    <div className="flex items-center gap-3 rounded-lg border-2 border-dashed border-teal-300 bg-teal-50/60 px-3 py-2.5">
+      <span className="rounded-md bg-teal-600 px-2 py-0.5 text-[11px] font-semibold text-white">
+        Yours
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm font-medium">{session.title}</div>
+        <div className="text-xs text-muted-foreground">
+          {session.inspectionDate}
+          {session.status === "draft" && (
+            <span className="ml-2 font-medium text-amber-600">Draft</span>
+          )}
+        </div>
+      </div>
+      <Button asChild size="sm" variant="outline" className="shrink-0">
+        <Link to="/demo/inspect">
+          <Pencil className="mr-1 h-3.5 w-3.5" /> Continue
+        </Link>
+      </Button>
+      <Button asChild size="sm" className="shrink-0 bg-brand-blue hover:bg-blue-600">
+        <Link to="/demo/report">View</Link>
+      </Button>
+    </div>
+  );
+}
+
 /* ------------------------------ property card ----------------------------- */
 
 function PropertyCard({
@@ -153,14 +276,7 @@ function PropertyCard({
         ))}
         {isInspector && (
           <div className="pt-1">
-            <Button
-              size="sm"
-              className="bg-brand-blue hover:bg-blue-600"
-              onClick={DEMO_TOAST}
-            >
-              <FilePlusCorner className="mr-1.5 h-4 w-4" />
-              New report
-            </Button>
+            <NewReportDialog tenantName={p.tenantName} />
           </div>
         )}
       </CardContent>
@@ -217,6 +333,7 @@ export default function DemoDashboard() {
               <Plus className="mr-1 h-4 w-4" /> Add property
             </Button>
           </div>
+          <DemoSessionRow />
           {demoInspectorProperties.map((p) => (
             <PropertyCard key={p.id} p={p} isInspector={true} />
           ))}

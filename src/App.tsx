@@ -7,6 +7,7 @@ import ReportEdit from './pages/ReportEdit'
 import NotFound from './pages/NotFound'
 import DemoDashboard from './pages/DemoDashboard'
 import DemoReport from './pages/DemoReport'
+import DemoInspect from './pages/DemoInspect'
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
       <Route path="/reports/:id/edit" element={<ReportEdit />} />
       <Route path="/demo" element={<DemoDashboard />} />
       <Route path="/demo/report" element={<DemoReport />} />
+      <Route path="/demo/inspect" element={<DemoInspect />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   )

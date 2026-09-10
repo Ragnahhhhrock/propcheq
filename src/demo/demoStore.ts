@@ -1,8 +1,7 @@
 // In-memory store for the interactive demo inspection (/demo/inspect).
 // Lives for the browser session only — nothing is saved to a server.
 
-import { areasForType, type ReportType } from "@contracts/propcheq";
-import { TYPE_LABELS } from "@/lib/propcheq-ui";
+import { areasForType, REPORT_TYPES, type ReportType } from "@contracts/propcheq";
 import type { DemoAction, DemoArea, DemoMedia } from "./demoData";
 
 export interface DemoSession {

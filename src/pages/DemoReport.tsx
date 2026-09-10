@@ -8,6 +8,7 @@ import {
   Check,
   X,
   HelpCircle,
+  ImageOff,
   Sparkles,
   Wrench,
   Lightbulb,
@@ -28,7 +29,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { toast } from "sonner";
-import { RATING_LABELS } from "@contracts/propcheq";
+import { RATING_LABELS, computeScore } from "@contracts/propcheq";
 import {
   TYPE_STYLES,
   TYPE_LABELS,
@@ -36,15 +37,17 @@ import {
   formatDate,
 } from "@/lib/propcheq-ui";
 import {
-  demoReport as report,
+  demoReport,
   demoInspectorProperties,
-  demoAreas as areas,
-  demoMedia as mediaList,
-  demoActions as actions,
+  demoAreas,
+  demoMedia,
+  demoActions,
   type DemoAction,
   type DemoArea,
+  type DemoMedia,
   type Tri,
 } from "@/demo/demoData";
+import { getDemoSession } from "@/demo/demoStore";
 
 const property = demoInspectorProperties[0];
 
@@ -146,6 +149,29 @@ function ActionPanel({ actions }: { actions: DemoAction[] }) {
 }
 
 export default function DemoReport() {
+  // If the visitor has conducted their own demo inspection, show it —
+  // otherwise show the sample report.
+  const session = getDemoSession();
+  const report = session
+    ? {
+        title: session.title,
+        type: session.type,
+        status: session.status,
+        inspectionDate: session.inspectionDate,
+        inspectorName: session.inspectorName,
+        tenantName: session.tenantName || null,
+        score: computeScore(session.cleanliness, session.condition),
+        cleanliness: session.cleanliness,
+        condition: session.condition,
+        summary: session.summary || null,
+        maintenanceRequired: session.maintenanceRequired || null,
+        suggestedImprovements: session.suggestedImprovements || null,
+      }
+    : demoReport;
+  const areas: DemoArea[] = session ? session.areas : demoAreas;
+  const mediaList: DemoMedia[] = session ? session.media : demoMedia;
+  const actions: DemoAction[] = session ? session.actions : demoActions;
+
   const areaName = new Map(areas.map((a) => [a.id, a.name]));
   const allItems = areas.flatMap((a) => a.items);
   const issueCount = allItems.filter(
@@ -172,6 +198,11 @@ export default function DemoReport() {
               {TYPE_LABELS[report.type]}
             </span>
             <h1 className="text-xl font-bold tracking-tight">{report.title}</h1>
+            {report.status === "draft" && (
+              <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+                Draft — only visible to you
+              </span>
+            )}
           </div>
           <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
             <span className="inline-flex items-center gap-1">
@@ -243,26 +274,39 @@ export default function DemoReport() {
         {actions.length > 0 && <ActionPanel actions={actions} />}
 
         {/* media feed */}
-        <div className="space-y-3">
-          <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Sparkles className="h-4 w-4 text-brand-teal" /> Photos & video
-          </h2>
-          <div className="space-y-4">
-            {mediaList.map((m) => (
-              <figure key={m.id} className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-                <img src={m.url} alt={m.caption ?? ""} className="w-full object-cover" loading="lazy" />
-                <figcaption className="px-4 py-3">
-                  {m.areaId && areaName.get(m.areaId) && (
-                    <span className="mb-1 inline-block rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
-                      {areaName.get(m.areaId)}
-                    </span>
+        {mediaList.length > 0 && (
+          <div className="space-y-3">
+            <h2 className="flex items-center gap-2 text-lg font-semibold">
+              <Sparkles className="h-4 w-4 text-brand-teal" /> Photos & video
+            </h2>
+            <div className="space-y-4">
+              {mediaList.map((m) => (
+                <figure key={m.id} className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+                  {m.kind === "image" ? (
+                    <img src={m.url} alt={m.caption ?? ""} className="w-full object-cover" loading="lazy" />
+                  ) : (
+                    <video src={m.url} controls playsInline className="w-full" preload="metadata" />
                   )}
-                  {m.caption && <p className="text-sm">{m.caption}</p>}
-                </figcaption>
-              </figure>
-            ))}
+                  <figcaption className="px-4 py-3">
+                    {m.areaId && areaName.get(m.areaId) && (
+                      <span className="mb-1 inline-block rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                        {areaName.get(m.areaId)}
+                      </span>
+                    )}
+                    {m.caption && <p className="text-sm">{m.caption}</p>}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+        {mediaList.length === 0 && (
+          <Card>
+            <CardContent className="flex items-center gap-2 py-5 text-sm text-muted-foreground">
+              <ImageOff className="h-4 w-4" /> No photos attached to this report yet — add some from the editor.
+            </CardContent>
+          </Card>
+        )}
 
         {/* summary */}
         <div className="space-y-3">
