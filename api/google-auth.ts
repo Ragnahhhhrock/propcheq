@@ -6,8 +6,8 @@ import { signSessionToken } from "./kimi/session";
 import { upsertUser } from "./queries/users";
 import { env } from "./lib/env";
 
-const clientId = () => process.env.GOOGLE_CLIENT_ID ?? "";
-const clientSecret = () => process.env.GOOGLE_CLIENT_SECRET ?? "";
+const clientId = () => env.googleClientId;
+const clientSecret = () => env.googleClientSecret;
 const CALLBACK_PATH = "/api/oauth/google/callback";
 
 // Behind a TLS-terminating proxy (Railway, preview gateways, etc.) the Node

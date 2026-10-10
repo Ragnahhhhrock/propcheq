@@ -1,31 +1,23 @@
-import {
-  mysqlTable,
-  mysqlEnum,
-  varchar,
-  text,
-  timestamp,
-  bigint,
-  int,
-  boolean,
-  index,
-} from "drizzle-orm/mysql-core";
+import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 
-const pk = () => bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey();
+const pk = () => integer("id").primaryKey({ autoIncrement: true });
+const fk = (name: string) => integer(name);
+const now = () => new Date();
+const ts = (name: string) => integer(name, { mode: "timestamp" });
 
-export const users = mysqlTable("users", {
+export const users = sqliteTable("users", {
   id: pk(),
-  unionId: varchar("unionId", { length: 255 }).notNull().unique(),
-  name: varchar("name", { length: 255 }),
-  email: varchar("email", { length: 320 }),
-  passwordHash: varchar("passwordHash", { length: 255 }),
+  unionId: text("unionId").notNull().unique(),
+  name: text("name"),
+  email: text("email"),
+  passwordHash: text("passwordHash"),
   avatar: text("avatar"),
-  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt")
-    .defaultNow()
+  role: text("role", { enum: ["user", "admin"] }).default("user").notNull(),
+  createdAt: ts("createdAt").$defaultFn(now).notNull(),
+  updatedAt: ts("updatedAt").$defaultFn(now)
     .notNull()
     .$onUpdate(() => new Date()),
-  lastSignInAt: timestamp("lastSignInAt").defaultNow().notNull(),
+  lastSignInAt: ts("lastSignInAt").$defaultFn(now).notNull(),
 });
 
 export type User = typeof users.$inferSelect;
@@ -36,25 +28,25 @@ export type InsertUser = typeof users.$inferInsert;
 // is linked via an invite code. Only those two users may see its reports.
 // ---------------------------------------------------------------------------
 
-export const properties = mysqlTable(
+export const properties = sqliteTable(
   "properties",
   {
     id: pk(),
-    address: varchar("address", { length: 255 }).notNull(),
-    suburb: varchar("suburb", { length: 120 }).notNull(),
-    state: varchar("state", { length: 10 }).notNull(),
-    postcode: varchar("postcode", { length: 10 }).notNull(),
-    inspectorId: bigint("inspectorId", { mode: "number", unsigned: true })
+    address: text("address").notNull(),
+    suburb: text("suburb").notNull(),
+    state: text("state").notNull(),
+    postcode: text("postcode").notNull(),
+    inspectorId: fk("inspectorId")
       .notNull()
       .references(() => users.id),
-    ownerId: bigint("ownerId", { mode: "number", unsigned: true }).references(
+    ownerId: fk("ownerId").references(
       () => users.id,
     ),
-    ownerCode: varchar("ownerCode", { length: 16 }).notNull().unique(),
-    tenantName: varchar("tenantName", { length: 255 }),
-    leaseExpiry: varchar("leaseExpiry", { length: 40 }),
-    weeklyRent: varchar("weeklyRent", { length: 40 }),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    ownerCode: text("ownerCode").notNull().unique(),
+    tenantName: text("tenantName"),
+    leaseExpiry: text("leaseExpiry"),
+    weeklyRent: text("weeklyRent"),
+    createdAt: ts("createdAt").$defaultFn(now).notNull(),
   },
   (t) => ({
     inspectorIdx: index("prop_inspector_idx").on(t.inspectorId),
@@ -67,100 +59,100 @@ export type Property = typeof properties.$inferSelect;
 // Reports
 // ---------------------------------------------------------------------------
 
-export const reports = mysqlTable(
+export const reports = sqliteTable(
   "reports",
   {
     id: pk(),
-    propertyId: bigint("propertyId", { mode: "number", unsigned: true })
+    propertyId: fk("propertyId")
       .notNull()
       .references(() => properties.id),
-    type: mysqlEnum("type", ["routine", "entry", "exit"]).notNull(),
-    title: varchar("title", { length: 255 }).notNull(),
-    inspectionDate: varchar("inspectionDate", { length: 40 }).notNull(),
-    inspectorName: varchar("inspectorName", { length: 255 }).notNull(),
-    status: mysqlEnum("status", ["draft", "published"]).default("draft").notNull(),
+    type: text("type", { enum: ["routine", "entry", "exit"] }).notNull(),
+    title: text("title").notNull(),
+    inspectionDate: text("inspectionDate").notNull(),
+    inspectorName: text("inspectorName").notNull(),
+    status: text("status", { enum: ["draft", "published"] }).default("draft").notNull(),
     summary: text("summary"),
     maintenanceRequired: text("maintenanceRequired"),
     suggestedImprovements: text("suggestedImprovements"),
     // overall ratings 1..10, score cached as 0..100
-    cleanliness: int("cleanliness"),
-    condition: int("condition"),
-    score: int("score"),
-    tenantName: varchar("tenantName", { length: 255 }),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    publishedAt: timestamp("publishedAt"),
+    cleanliness: integer("cleanliness"),
+    condition: integer("condition"),
+    score: integer("score"),
+    tenantName: text("tenantName"),
+    createdAt: ts("createdAt").$defaultFn(now).notNull(),
+    publishedAt: ts("publishedAt"),
   },
   (t) => ({ propIdx: index("report_prop_idx").on(t.propertyId) }),
 );
 export type Report = typeof reports.$inferSelect;
 
-export const areas = mysqlTable(
+export const areas = sqliteTable(
   "areas",
   {
     id: pk(),
-    reportId: bigint("reportId", { mode: "number", unsigned: true })
+    reportId: fk("reportId")
       .notNull()
       .references(() => reports.id),
-    name: varchar("name", { length: 120 }).notNull(),
-    sortOrder: int("sortOrder").notNull().default(0),
+    name: text("name").notNull(),
+    sortOrder: integer("sortOrder").notNull().default(0),
   },
   (t) => ({ reportIdx: index("area_report_idx").on(t.reportId) }),
 );
 export type Area = typeof areas.$inferSelect;
 
-export const items = mysqlTable(
+export const items = sqliteTable(
   "items",
   {
     id: pk(),
-    areaId: bigint("areaId", { mode: "number", unsigned: true })
+    areaId: fk("areaId")
       .notNull()
       .references(() => areas.id),
-    name: varchar("name", { length: 160 }).notNull(),
-    clean: boolean("clean"),
-    undamaged: boolean("undamaged"),
-    working: boolean("working"),
-    rating: int("rating"), // optional 1..10
+    name: text("name").notNull(),
+    clean: integer("clean", { mode: "boolean" }),
+    undamaged: integer("undamaged", { mode: "boolean" }),
+    working: integer("working", { mode: "boolean" }),
+    rating: integer("rating"), // optional 1..10
     comment: text("comment"),
-    sortOrder: int("sortOrder").notNull().default(0),
+    sortOrder: integer("sortOrder").notNull().default(0),
   },
   (t) => ({ areaIdx: index("item_area_idx").on(t.areaId) }),
 );
 export type Item = typeof items.$inferSelect;
 
-export const media = mysqlTable(
+export const media = sqliteTable(
   "media",
   {
     id: pk(),
-    reportId: bigint("reportId", { mode: "number", unsigned: true })
+    reportId: fk("reportId")
       .notNull()
       .references(() => reports.id),
-    areaId: bigint("areaId", { mode: "number", unsigned: true }).references(
+    areaId: fk("areaId").references(
       () => areas.id,
     ),
-    kind: mysqlEnum("kind", ["image", "video"]).notNull(),
-    url: varchar("url", { length: 512 }).notNull(),
+    kind: text("kind", { enum: ["image", "video"] }).notNull(),
+    url: text("url").notNull(),
     caption: text("caption"),
-    sortOrder: int("sortOrder").notNull().default(0),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    sortOrder: integer("sortOrder").notNull().default(0),
+    createdAt: ts("createdAt").$defaultFn(now).notNull(),
   },
   (t) => ({ reportIdx: index("media_report_idx").on(t.reportId) }),
 );
 export type Media = typeof media.$inferSelect;
 
-export const actionRequests = mysqlTable(
+export const actionRequests = sqliteTable(
   "action_requests",
   {
     id: pk(),
-    reportId: bigint("reportId", { mode: "number", unsigned: true })
+    reportId: fk("reportId")
       .notNull()
       .references(() => reports.id),
     text: text("text").notNull(),
-    status: mysqlEnum("status", ["pending", "approved", "more_info", "declined"])
+    status: text("status", { enum: ["pending", "approved", "more_info", "declined"] })
       .default("pending")
       .notNull(),
     response: text("response"),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    respondedAt: timestamp("respondedAt"),
+    createdAt: ts("createdAt").$defaultFn(now).notNull(),
+    respondedAt: ts("respondedAt"),
   },
   (t) => ({ reportIdx: index("action_report_idx").on(t.reportId) }),
 );

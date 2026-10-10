@@ -1,5 +1,3 @@
-import { randomBytes, scrypt, timingSafeEqual } from "crypto";
-import { promisify } from "util";
 import * as cookie from "cookie";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
@@ -11,22 +9,51 @@ import { findUserByUnionId, upsertUser } from "./queries/users";
 import { env } from "./lib/env";
 import type { TrpcContext } from "./context";
 
-const scryptAsync = promisify(scrypt);
+// Password hashing uses WebCrypto PBKDF2 (available in Workers; Node's scrypt
+// is too CPU-heavy for the Workers runtime). Workers cap PBKDF2 at 100k
+// iterations. Stored format: pbkdf2$<iterations>$<saltHex>$<hashHex>
+const PBKDF2_ITERATIONS = 100_000;
+
+const toHex = (buf: ArrayBuffer | Uint8Array) =>
+  Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("");
+const fromHex = (hex: string) =>
+  new Uint8Array((hex.match(/.{2}/g) ?? []).map((h) => parseInt(h, 16)));
+
+async function derive(password: string, salt: Uint8Array, iterations: number) {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(password),
+    "PBKDF2",
+    false,
+    ["deriveBits"],
+  );
+  return new Uint8Array(
+    await crypto.subtle.deriveBits(
+      { name: "PBKDF2", hash: "SHA-256", salt, iterations },
+      key,
+      256,
+    ),
+  );
+}
 
 async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16).toString("hex");
-  const derived = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${salt}:${derived.toString("hex")}`;
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const derived = await derive(password, salt, PBKDF2_ITERATIONS);
+  return `pbkdf2$${PBKDF2_ITERATIONS}$${toHex(salt)}$${toHex(derived)}`;
 }
 
 async function verifyPassword(
   password: string,
   stored: string,
 ): Promise<boolean> {
-  const [salt, hash] = stored.split(":");
-  if (!salt || !hash) return false;
-  const derived = (await scryptAsync(password, salt, 64)) as Buffer;
-  return timingSafeEqual(derived, Buffer.from(hash, "hex"));
+  const [scheme, iterStr, saltHex, hashHex] = stored.split("$");
+  if (scheme !== "pbkdf2" || !iterStr || !saltHex || !hashHex) return false;
+  const derived = await derive(password, fromHex(saltHex), parseInt(iterStr, 10));
+  const expected = fromHex(hashHex);
+  if (derived.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < derived.length; i++) diff |= derived[i] ^ expected[i];
+  return diff === 0;
 }
 
 const emailUnionId = (email: string) =>

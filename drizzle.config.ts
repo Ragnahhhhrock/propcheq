@@ -1,16 +1,9 @@
-import "dotenv/config";
 import { defineConfig } from "drizzle-kit";
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  throw new Error("DATABASE_URL is required to run drizzle commands");
-}
-
+// D1 (SQLite). `npm run db:generate` writes SQL migrations to ./migrations,
+// which wrangler applies with `wrangler d1 migrations apply`.
 export default defineConfig({
   schema: "./db/schema.ts",
-  out: "./db/migrations",
-  dialect: "mysql",
-  dbCredentials: {
-    url: connectionString,
-  },
+  out: "./migrations",
+  dialect: "sqlite",
 });

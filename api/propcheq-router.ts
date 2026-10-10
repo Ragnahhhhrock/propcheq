@@ -113,7 +113,7 @@ export const propcheqRouter = createRouter({
       const [{ id }] = await db
         .insert(properties)
         .values({ ...input, inspectorId: ctx.user.id, ownerCode: makeCode() })
-        .$returningId();
+        .returning({ id: properties.id });
       return { id, ownerCode: (await getPropertyOrThrow(id)).ownerCode };
     }),
 
@@ -181,24 +181,26 @@ export const propcheqRouter = createRouter({
           inspectorName: input.inspectorName || ctx.user.name || "Inspector",
           tenantName: input.tenantName || prop.tenantName,
         })
-        .$returningId();
+        .returning({ id: reports.id });
       // template areas + items, defaulted "all good" for speed
       const template = areasForType(input.type);
       for (let a = 0; a < template.length; a++) {
         const [{ id: areaId }] = await db
           .insert(areas)
           .values({ reportId: id, name: template[a].name, sortOrder: a })
-          .$returningId();
-        await db.insert(items).values(
-          template[a].items.map((name, i) => ({
-            areaId,
-            name,
-            clean: true,
-            undamaged: true,
-            working: true,
-            sortOrder: i,
-          })),
-        );
+          .returning({ id: areas.id });
+        const rows = template[a].items.map((name, i) => ({
+          areaId,
+          name,
+          clean: true,
+          undamaged: true,
+          working: true,
+          sortOrder: i,
+        }));
+        // D1 caps bound parameters per statement, so insert in small chunks
+        for (let c = 0; c < rows.length; c += 10) {
+          await db.insert(items).values(rows.slice(c, c + 10));
+        }
       }
       return { id };
     }),
@@ -320,7 +322,7 @@ export const propcheqRouter = createRouter({
           [{ id: areaId }] = await db
             .insert(areas)
             .values({ reportId: input.reportId, name: a.name, sortOrder: a.sortOrder })
-            .$returningId();
+            .returning({ id: areas.id });
         }
         const existingItems = await db.query.items.findMany({ where: eq(items.areaId, areaId!) });
         const keepItemIds = a.items.filter((i) => i.id).map((i) => i.id!);
@@ -402,7 +404,7 @@ export const propcheqRouter = createRouter({
           caption: input.caption ?? null,
           sortOrder: Date.now() % 1000000,
         })
-        .$returningId();
+        .returning({ id: media.id });
       return { id };
     }),
 
@@ -446,7 +448,7 @@ export const propcheqRouter = createRouter({
       const [{ id }] = await getDb()
         .insert(actionRequests)
         .values({ reportId: input.reportId, text: input.text })
-        .$returningId();
+        .returning({ id: actionRequests.id });
       return { id };
     }),
 
