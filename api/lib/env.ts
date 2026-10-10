@@ -8,8 +8,6 @@ export interface Bindings {
   UPLOADS: R2Bucket;
   APP_ID?: string;
   APP_SECRET?: string;
-  KIMI_AUTH_URL?: string;
-  KIMI_OPEN_URL?: string;
   OWNER_UNION_ID?: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
@@ -45,12 +43,6 @@ export const env = {
   },
   get appSecret() {
     return required("APP_SECRET");
-  },
-  get kimiAuthUrl() {
-    return required("KIMI_AUTH_URL");
-  },
-  get kimiOpenUrl() {
-    return required("KIMI_OPEN_URL");
   },
   get ownerUnionId() {
     return read("OWNER_UNION_ID");

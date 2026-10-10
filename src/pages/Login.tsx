@@ -3,22 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/providers/trpc";
 
-function getKimiOAuthUrl() {
-  const kimiAuthUrl = import.meta.env.VITE_KIMI_AUTH_URL;
-  const appID = import.meta.env.VITE_APP_ID;
-  const redirectUri = `${window.location.origin}/api/oauth/callback`;
-  const state = btoa(redirectUri);
-
-  const url = new URL(`${kimiAuthUrl}/api/oauth/authorize`);
-  url.searchParams.set("client_id", appID);
-  url.searchParams.set("redirect_uri", redirectUri);
-  url.searchParams.set("response_type", "code");
-  url.searchParams.set("scope", "profile");
-  url.searchParams.set("state", state);
-
-  return url.toString();
-}
-
 function GoogleMark() {
   return (
     <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -160,16 +144,6 @@ export default function Login() {
               : "Already have an account? Sign in"}
           </button>
         </div>
-
-        <button
-          type="button"
-          onClick={() => {
-            window.location.href = getKimiOAuthUrl();
-          }}
-          className="text-sm font-medium text-[#64748B] hover:text-[#0F172A]"
-        >
-          Sign in with Kimi
-        </button>
 
         <a
           href="/demo"

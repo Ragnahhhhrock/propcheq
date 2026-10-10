@@ -4,14 +4,12 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { appRouter } from "./router";
 import { createContext } from "./context";
 import type { Bindings } from "./lib/env";
-import { createOAuthCallbackHandler, authenticateRequest } from "./kimi/auth";
+import { authenticateRequest } from "./kimi/auth";
 import { googleOAuthStart, googleOAuthCallback } from "./google-auth";
-import { Paths } from "@contracts/constants";
 
 const app = new Hono<{ Bindings: Bindings }>();
 
 app.use(bodyLimit({ maxSize: 50 * 1024 * 1024 }));
-app.get(Paths.oauthCallback, createOAuthCallbackHandler());
 app.get("/api/oauth/google/start", googleOAuthStart());
 app.get("/api/oauth/google/callback", googleOAuthCallback());
 
