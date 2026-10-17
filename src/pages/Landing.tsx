@@ -637,6 +637,13 @@ export default function Landing() {
           </div>
           <div className="mt-12 border-t border-white/10 pt-6 text-xs text-white/50">
             © {new Date().getFullYear()} Propcheq · propcheq.com
+            <p className="mt-2">
+              Another{' '}
+              <a href="https://malgordon.com/" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
+                Mal Gordon
+              </a>{' '}
+              creation
+            </p>
           </div>
         </div>
       </footer>
