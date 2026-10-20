@@ -60,7 +60,7 @@ export const propcheqRouter = createRouter({
       propertyCount,
       actionsActioned,
     ] = await Promise.all([
-      n(db.select({ c: count() }).from(reports).where(eq(reports.status, "published"))),
+      n(db.select({ c: count() }).from(reports)),
       n(db.select({ c: count() }).from(items).where(isNotNull(items.rating))),
       n(db.select({ c: count() }).from(reports).where(isNotNull(reports.cleanliness))),
       n(db.select({ c: count() }).from(reports).where(isNotNull(reports.condition))),
