@@ -29,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ScoreGauge from "@/components/ScoreGauge";
+import StatsCounter from "@/components/StatsCounter";
 
 /* ---------------------------------- nav ---------------------------------- */
 
@@ -357,6 +358,9 @@ export default function Landing() {
           <PhoneMockup />
         </div>
       </section>
+
+      {/* Social proof */}
+      <StatsCounter />
 
       {/* Problem */}
       <section id="problem" className="mx-auto max-w-6xl px-4 py-20">

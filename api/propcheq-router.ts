@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { desc, eq, inArray } from "drizzle-orm";
-import { createRouter, authedQuery } from "./middleware";
+import { count, desc, eq, inArray, isNotNull } from "drizzle-orm";
+import { createRouter, authedQuery, publicQuery } from "./middleware";
 import { getDb } from "./queries/connection";
 import {
   properties,
@@ -47,6 +47,41 @@ async function reportWithProperty(reportId: number) {
 }
 
 export const propcheqRouter = createRouter({
+  // ----------------------------------------------------- public site stats
+  publicStats: publicQuery.query(async () => {
+    const db = getDb();
+    const n = async (q: Promise<{ c: number }[]>) => Number((await q)[0]?.c ?? 0);
+    const [
+      reportCount,
+      itemRatings,
+      cleanlinessRatings,
+      conditionRatings,
+      mediaCount,
+      propertyCount,
+      actionsActioned,
+    ] = await Promise.all([
+      n(db.select({ c: count() }).from(reports).where(eq(reports.status, "published"))),
+      n(db.select({ c: count() }).from(items).where(isNotNull(items.rating))),
+      n(db.select({ c: count() }).from(reports).where(isNotNull(reports.cleanliness))),
+      n(db.select({ c: count() }).from(reports).where(isNotNull(reports.condition))),
+      n(db.select({ c: count() }).from(media)),
+      n(db.select({ c: count() }).from(properties)),
+      n(
+        db
+          .select({ c: count() })
+          .from(actionRequests)
+          .where(inArray(actionRequests.status, ["approved", "declined", "more_info"])),
+      ),
+    ]);
+    return {
+      reports: reportCount,
+      ratings: itemRatings + cleanlinessRatings + conditionRatings,
+      media: mediaCount,
+      properties: propertyCount,
+      actionsActioned,
+    };
+  }),
+
   // ------------------------------------------------------------- dashboard
   myDashboard: authedQuery.query(async ({ ctx }) => {
     const db = getDb();
