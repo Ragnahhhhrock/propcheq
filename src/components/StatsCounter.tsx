@@ -9,6 +9,9 @@ type Stat = {
   Icon: ComponentType<{ className?: string }>;
 };
 
+// Hide the whole strip until enough reports exist for it to read as social proof.
+const MIN_REPORTS = 20;
+
 const STATS: Stat[] = [
   { key: "reports", label: "Reports generated", Icon: FileText },
   { key: "ratings", label: "Ratings given", Icon: Star },
@@ -49,11 +52,13 @@ export default function StatsCounter() {
     retry: 1,
   });
 
+  if (!data || data.reports < MIN_REPORTS) return null;
+
   return (
     <section aria-label="Propcheq in numbers" className="border-y border-slate-200 bg-white">
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-10 lg:grid-cols-4">
         {STATS.map((stat) => (
-          <StatItem key={stat.key} stat={stat} value={data?.[stat.key]} />
+          <StatItem key={stat.key} stat={stat} value={data[stat.key]} />
         ))}
       </div>
     </section>
